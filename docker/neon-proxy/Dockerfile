@@ -1,7 +1,7 @@
 # https://github.com/neondatabase/serverless/issues/33
 
 FROM ubuntu:20.04
-ENV DEBIAN_FRONTEND=noninteractive
+ARG DEBIAN_FRONTEND=noninteractive
 
 # update the base packages
 RUN \
