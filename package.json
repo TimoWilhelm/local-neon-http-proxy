@@ -1,0 +1,11 @@
+{
+  "name": "neon-proxy-local",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "node sample.mjs"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@neondatabase/serverless": "^0.6.0"
+  }
+}
