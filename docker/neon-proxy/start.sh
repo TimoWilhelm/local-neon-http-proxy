@@ -1,8 +1,13 @@
 #!/bin/bash
 
+if [ -z "$PG_CONNECTION_STRING" ]; then
+  echo "PG_CONNECTION_STRING is not set"
+  exit 1
+fi
+
 # Start the neon-proxy
-./target/debug/proxy \
-  -c server.crt \
+./neon-proxy \
+  -c server.pem \
   -k server.key \
   --auth-backend=postgres \
   --auth-endpoint=$PG_CONNECTION_STRING \
