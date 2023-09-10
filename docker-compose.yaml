@@ -2,7 +2,6 @@ version: '3'
 
 services:
   postgres:
-    container_name: postgres
     image: postgres:15
     command: '-d 1' # set debug-level
     volumes:
@@ -15,7 +14,6 @@ services:
       - POSTGRES_DB=main
 
   neon-proxy:
-    container_name: neon-proxy
     build:
       context: ./docker/neon-proxy/
       dockerfile: Dockerfile
