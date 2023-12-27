@@ -15,8 +15,9 @@ RUN \
 
 # get and build the proxy
 RUN git clone https://github.com/neondatabase/neon.git
+RUN cd neon && git checkout 3710c32
 WORKDIR /neon
-RUN cargo build --bin proxy
+RUN cargo build --bin proxy --features "testing"
 
 
 FROM debian:bookworm-slim
