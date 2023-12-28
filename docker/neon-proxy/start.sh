@@ -5,6 +5,11 @@ if [ -z "$PG_CONNECTION_STRING" ]; then
   exit 1
 fi
 
+# Create required tables
+psql -Atx $PG_CONNECTION_STRING \
+  -c "CREATE SCHEMA IF NOT EXISTS neon_control_plane" \
+  -c "CREATE TABLE neon_control_plane.endpoints (endpoint_id VARCHAR(255) PRIMARY KEY, allowed_ips VARCHAR(255))"
+
 # Start the neon-proxy
 ./neon-proxy \
   -c server.pem \

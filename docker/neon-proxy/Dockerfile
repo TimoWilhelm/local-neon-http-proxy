@@ -14,9 +14,9 @@ RUN \
   && apt-get clean -qq && rm -rf /var/lib/apt/lists/*
 
 # get and build the proxy
-RUN git clone https://github.com/neondatabase/neon.git
+RUN git clone --recursive https://github.com/neondatabase/neon.git
 WORKDIR /neon
-RUN cargo build --bin proxy
+RUN cargo build --bin proxy --features "testing"
 
 
 FROM debian:bookworm-slim
@@ -29,6 +29,7 @@ RUN \
   curl \
   ca-certificates \
   openssl \
+  postgresql-client \
   && apt-get clean -qq && rm -rf /var/lib/apt/lists/*
 
 # install caddy
