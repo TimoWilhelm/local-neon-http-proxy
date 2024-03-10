@@ -61,5 +61,7 @@ COPY --from=rust-builder /neon/target/debug/proxy ./neon-proxy
 COPY $PWD/Caddyfile Caddyfile
 COPY $PWD/start.sh start.sh
 
+RUN chmod +x start.sh
+
 EXPOSE 4444
 ENTRYPOINT "./start.sh"
