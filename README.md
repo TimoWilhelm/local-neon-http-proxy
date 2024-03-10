@@ -1,4 +1,4 @@
-# Sample project how to connect to a local PostgreSQL database using the neon http proxy
+# Connect to a local PostgreSQL database using the neon http proxy
 
 This repository contains a Dockerfile to run the neon proxy locally. It basically implements the steps described in [neondatabase/serverless/issues/33](https://github.com/neondatabase/serverless/issues/33#issuecomment-1634853042).
 
