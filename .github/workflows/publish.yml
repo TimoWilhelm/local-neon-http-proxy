@@ -19,6 +19,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Lint Dockerfile
+        uses: hadolint/hadolint-action@master
+        with:
+          dockerfile: "./docker/neon-proxy/Dockerfile"
+
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:

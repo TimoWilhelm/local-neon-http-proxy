@@ -1,7 +1,10 @@
 # https://github.com/neondatabase/serverless/issues/33
 
+# hadolint global ignore=DL3008
+
 FROM rust:bookworm as rust-builder
 ARG DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # install apt dependencies
 RUN \
@@ -21,6 +24,7 @@ RUN cargo build --bin proxy --features "testing"
 
 FROM debian:bookworm-slim
 ARG DEBIAN_FRONTEND=noninteractive
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # install apt dependencies
 RUN \
@@ -64,4 +68,4 @@ COPY $PWD/start.sh start.sh
 RUN chmod +x start.sh
 
 EXPOSE 4444
-ENTRYPOINT "./start.sh"
+ENTRYPOINT ["./start.sh"]
