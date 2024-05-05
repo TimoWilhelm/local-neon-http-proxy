@@ -2,9 +2,11 @@
 
 This repository contains a Dockerfile to run the neon proxy locally. It basically implements the steps described in [neondatabase/serverless/issues/33](https://github.com/neondatabase/serverless/issues/33#issuecomment-1634853042).
 
-The container also includes a small [Caddy](https://caddyserver.com/) reverse proxy to setup the upstream connection via HTTPS so the local code does not need to trust the self-signed certificate of the neon proxy.
+The proxy uses [localtest.me](https://readme.localtest.me/) to configure the TLS server name and includes a small [Caddy](https://caddyserver.com/) reverse proxy to setup the upstream connection via HTTPS so the local code does not need to trust the self-signed certificate of the neon proxy.
 
 ## Usage
+
+The latest version is hosted on the GitHub Container Registry and can be pulled from `ghcr.io/timowilhelm/local-neon-http-proxy:main`.
 
 ### Local setup
 To use the proxy you need to provide a connection string to a PostgreSQL database. The easiest setup is to use a `docker-compose.yml` file that starts a PostgreSQL database and the local neon proxy.
