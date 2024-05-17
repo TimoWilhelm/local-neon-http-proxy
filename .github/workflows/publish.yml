@@ -56,7 +56,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
-          version: latest # Important to have annotation feature
+          version: latest
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -125,7 +125,7 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
         with:
-          version: latest # Important to have annotation feature
+          version: latest
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -145,10 +145,10 @@ jobs:
       - name: Create manifest list and push
         working-directory: /tmp/digests
         run: |
-          docker buildx imagetools create \
-          $(printf "${{ steps.meta.outputs.annotations }}" | awk '{print "--annotation", "\"" $0 "\""}') \
-          $(printf "${{ steps.meta.outputs.tags }}" | awk '{print "--tag", $0}') \
-          $(printf '${{ needs.prepare.outputs.REGISTRY_IMAGE }}@sha256:%s ' *)
+          TAGS=$(jq -cr '.tags | map("--tag " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          ANNOTATIONS=$(jq -cr '.annotations | map("--annotation \"" + . + "\"") | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          SOURCE=$(printf '${{ needs.prepare.outputs.REGISTRY_IMAGE }}@sha256:%s ' *)
+          eval "docker buildx imagetools create $TAGS $ANNOTATIONS $SOURCE"
 
       - name: Inspect image
         run: |
