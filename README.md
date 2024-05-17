@@ -26,6 +26,11 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=main
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   neon-proxy:
     image: ghcr.io/timowilhelm/local-neon-http-proxy:main
@@ -34,7 +39,8 @@ services:
     ports:
       - '4444:4444'
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
 
 volumes:
   db_data:
