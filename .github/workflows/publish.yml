@@ -1,4 +1,3 @@
-#
 name: Create and publish a Docker image
 
 on:
@@ -8,14 +7,16 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+
+# https://docs.docker.com/build/ci/github-actions/multi-platform/#distribute-build-across-multiple-runners
 
 jobs:
-  build-and-push-image:
+  prepare:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
+    outputs:
+      REGISTRY_IMAGE: ${{ steps.registry.outputs.REGISTRY_IMAGE }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -23,7 +24,39 @@ jobs:
       - name: Lint Dockerfile
         uses: hadolint/hadolint-action@master
         with:
-          dockerfile: "./docker/neon-proxy/Dockerfile"
+          dockerfile: './docker/neon-proxy/Dockerfile'
+      - name: Registry image name
+        env:
+          REGISTRY: ${{ env.REGISTRY }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        id: registry
+        run: |
+          echo "REGISTRY_IMAGE=${REGISTRY@L}/${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
+
+  build:
+    needs:
+      - prepare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm64
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          version: latest
 
       - name: Log in to the Container registry
         uses: docker/login-action@v3
@@ -32,16 +65,91 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract metadata (tags, labels) for Docker
+      - name: Docker Meta
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ needs.prepare.outputs.REGISTRY_IMAGE }}
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,manifest-descriptor # Important for digest annotation (used by Github packages)
 
-      - name: Build and push Docker image
+      - name: Build by digest
+        id: build-image
         uses: docker/build-push-action@v5
         with:
           context: ./docker/neon-proxy/
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          platforms: ${{ matrix.platform }}
           labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          outputs: |
+            type=image,name=${{ needs.prepare.outputs.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build-image.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Sanitize platform
+        id: sanitize
+        run: |
+          platform=${{ matrix.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ steps.sanitize.outputs.PLATFORM_PAIR }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  merge:
+    runs-on: ubuntu-latest
+    needs:
+      - prepare
+      - build
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          version: latest
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ needs.prepare.outputs.REGISTRY_IMAGE }}
+        env:
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: index # Important for manifest annotation (used by Github packages)
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          TAGS=$(jq -cr '.tags | map("--tag " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          ANNOTATIONS=$(jq -cr '.annotations | map("--annotation \"" + . + "\"") | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON")
+          SOURCE=$(printf '${{ needs.prepare.outputs.REGISTRY_IMAGE }}@sha256:%s ' *)
+          eval "docker buildx imagetools create $TAGS $ANNOTATIONS $SOURCE"
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ${{ needs.prepare.outputs.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}

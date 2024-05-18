@@ -17,7 +17,7 @@ RUN \
   && apt-get clean -qq && rm -rf /var/lib/apt/lists/*
 
 # get and build the proxy
-RUN git clone --recursive https://github.com/neondatabase/neon.git
+RUN git clone https://github.com/neondatabase/neon.git
 WORKDIR /neon
 RUN cargo build --bin proxy --features "testing"
 
