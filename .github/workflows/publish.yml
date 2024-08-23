@@ -47,6 +47,12 @@ jobs:
           - linux/amd64
           - linux/arm64
     steps:
+      - name: Sanitize platform
+        id: sanitize
+        run: |
+          platform=${{ matrix.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> "$GITHUB_OUTPUT"
+
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -83,20 +89,14 @@ jobs:
           annotations: ${{ steps.meta.outputs.annotations }}
           outputs: |
             type=image,name=${{ needs.prepare.outputs.REGISTRY_IMAGE }},push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=buildkit-${{ steps.sanitize.outputs.PLATFORM_PAIR }}
+          cache-to: type=gha,mode=max,scope=buildkit-${{ steps.sanitize.outputs.PLATFORM_PAIR }}
 
       - name: Export digest
         run: |
           mkdir -p /tmp/digests
           digest="${{ steps.build-image.outputs.digest }}"
           touch "/tmp/digests/${digest#sha256:}"
-
-      - name: Sanitize platform
-        id: sanitize
-        run: |
-          platform=${{ matrix.platform }}
-          echo "PLATFORM_PAIR=${platform//\//-}" >> "$GITHUB_OUTPUT"
 
       - name: Upload digest
         uses: actions/upload-artifact@v4
