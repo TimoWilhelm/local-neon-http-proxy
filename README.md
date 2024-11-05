@@ -57,7 +57,8 @@ When using the local proxy you need to add a custom fetchEndpoint function to th
 local proxy listens on `http://db.localtest.me:4444/sql`.
 
 ```js
-import { neon, neonConfig } from '@neondatabase/serverless';
+import { neon, neonConfig, Pool } from '@neondatabase/serverless';
+import ws from 'ws';
 
 const connectionString = 'postgres://postgres:postgres@db.localtest.me:5432/main';
 
@@ -66,8 +67,21 @@ neonConfig.fetchEndpoint = (host) => {
   return `${protocol}://${host}:${port}/sql`;
 };
 
+neonConfig.wsProxy = (host) => `${host}:4444/v1`;
+neonConfig.useSecureWebSocket = false;
+neonConfig.pipelineTLS = false;
+neonConfig.pipelineConnect = false;
+neonConfig.webSocketConstructor = ws;
+
+const pool = new Pool({ connectionString });
+const { rows } = await pool.query('SELECT * FROM NOW()');
+
+console.log(rows[0]);
+
 const sql = neon(connectionString);
 const [result] = await sql`SELECT * FROM NOW()`;
+
+console.log(result);
 ```
 
 ## Developing
