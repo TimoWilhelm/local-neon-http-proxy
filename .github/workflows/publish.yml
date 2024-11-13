@@ -77,7 +77,7 @@ jobs:
         with:
           images: ${{ needs.prepare.outputs.REGISTRY_IMAGE }}
         env:
-          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,manifest-descriptor # Important for digest annotation (used by Github packages)
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,manifest-descriptor # used by GitHub packages for digest annotation
 
       - name: Build by digest
         id: build-image
@@ -140,7 +140,7 @@ jobs:
         with:
           images: ${{ needs.prepare.outputs.REGISTRY_IMAGE }}
         env:
-          DOCKER_METADATA_ANNOTATIONS_LEVELS: index # Important for manifest annotation (used by Github packages)
+          DOCKER_METADATA_ANNOTATIONS_LEVELS: index # used by GitHub packages for manifest annotation
 
       - name: Create manifest list and push
         working-directory: /tmp/digests
