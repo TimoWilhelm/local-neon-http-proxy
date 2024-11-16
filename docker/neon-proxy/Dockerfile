@@ -2,7 +2,7 @@
 
 # hadolint global ignore=DL3008
 
-FROM rust:bookworm as rust-builder
+FROM rust:bookworm AS rust-builder
 ARG DEBIAN_FRONTEND=noninteractive
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
