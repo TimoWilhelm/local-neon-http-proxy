@@ -62,8 +62,8 @@ RUN openssl req -new -x509 \
 # copy the proxy binary
 COPY --from=rust-builder /neon/target/debug/proxy ./neon-proxy
 
-COPY $PWD/Caddyfile Caddyfile
-COPY $PWD/start.sh start.sh
+COPY ./Caddyfile Caddyfile
+COPY ./start.sh start.sh
 
 RUN chmod +x start.sh
 
