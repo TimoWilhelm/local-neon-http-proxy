@@ -16,6 +16,18 @@ The latest version is hosted on the GitHub Container Registry and can be pulled 
 
 ### Local setup
 
+If you plan to work completely offline, you'll need to add the following entry to your system's
+hosts file:
+
+```bash
+127.0.0.1 db.localtest.me
+```
+
+For detailed instructions on editing your hosts file on different operating systems, refer to
+[this guide](https://www.hostinger.in/tutorials/how-to-edit-hosts-file). Note that this step is only
+necessary if you need to develop without an internet connection, as localtest.me normally resolves
+to 127.0.0.1 automatically when online.
+
 To use the proxy you need to provide a connection string to a PostgreSQL database. The easiest setup
 is to use a `docker-compose.yml` file that starts a PostgreSQL database and the local Neon Proxy.
 
