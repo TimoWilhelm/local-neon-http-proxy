@@ -56,9 +56,9 @@ volumes:
 #### Offline setup
 
 > [!NOTE] 
-> This step is only necessary if you need to use the proxy without an internet connection.
-> [`localtest.me`](https://readme.localtest.me/) normally resolves all subdomains to 127.0.0.1
-> automatically when online.
+> This step is only necessary if you want to use the proxy without an internet connection.
+> [`localtest.me`](https://readme.localtest.me/) normally resolves all subdomains to `127.0.0.1`
+> automatically when you are able to reach the DNS server.
 
 If you plan to work completely offline, you will need to add the following entry to your system's
 hosts file:
