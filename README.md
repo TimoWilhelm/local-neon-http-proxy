@@ -3,7 +3,8 @@
 This repository contains a Dockerfile to run the Neon Proxy locally, which supports connections over
 HTTP or WebSockets using the [Neon Serverless Driver](https://github.com/neondatabase/serverless).
 It implements the steps described in
-[neondatabase/serverless/issues/33](https://github.com/neondatabase/serverless/issues/33#issuecomment-1634853042) to add support for connections over HTTP.
+[neondatabase/serverless/issues/33](https://github.com/neondatabase/serverless/issues/33#issuecomment-1634853042)
+to add support for connections over HTTP.
 
 The proxy uses [localtest.me](https://readme.localtest.me/) to configure the TLS server name and
 includes a small [Caddy](https://caddyserver.com/) reverse proxy to setup the upstream connection
@@ -15,18 +16,6 @@ The latest version is hosted on the GitHub Container Registry and can be pulled 
 `ghcr.io/timowilhelm/local-neon-http-proxy:main`.
 
 ### Local setup
-
-If you plan to work completely offline, you'll need to add the following entry to your system's
-hosts file:
-
-```bash
-127.0.0.1 db.localtest.me
-```
-
-For detailed instructions on editing your hosts file on different operating systems, refer to
-[this guide](https://www.hostinger.in/tutorials/how-to-edit-hosts-file). Note that this step is only
-necessary if you need to develop without an internet connection, as localtest.me normally resolves
-to 127.0.0.1 automatically when online.
 
 To use the proxy you need to provide a connection string to a PostgreSQL database. The easiest setup
 is to use a `docker-compose.yml` file that starts a PostgreSQL database and the local Neon Proxy.
@@ -45,7 +34,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=main
     healthcheck:
-      test: [ 'CMD-SHELL', 'pg_isready -U postgres' ]
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -63,6 +52,22 @@ services:
 volumes:
   db_data:
 ```
+
+#### Offline setup
+
+> [!NOTE] This step is only necessary if you need to use the proxy without an internet connection.
+> [`localtest.me`](https://readme.localtest.me/) normally resolves all subdomains to 127.0.0.1
+> automatically when online.
+
+If you plan to work completely offline, you will need to add the following entry to your system's
+hosts file:
+
+```txt
+127.0.0.1 db.localtest.me
+```
+
+For detailed instructions on editing your hosts file on different operating systems, you can refer
+to [this guide](https://www.hostinger.in/tutorials/how-to-edit-hosts-file).
 
 ### Connecting to the Neon Proxy
 
