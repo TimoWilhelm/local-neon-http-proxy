@@ -55,7 +55,8 @@ volumes:
 
 #### Offline setup
 
-> [!NOTE] This step is only necessary if you need to use the proxy without an internet connection.
+> [!NOTE] 
+> This step is only necessary if you need to use the proxy without an internet connection.
 > [`localtest.me`](https://readme.localtest.me/) normally resolves all subdomains to 127.0.0.1
 > automatically when online.
 
