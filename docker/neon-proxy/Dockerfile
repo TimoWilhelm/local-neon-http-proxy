@@ -71,4 +71,4 @@ COPY ./start.sh start.sh
 RUN chmod +x start.sh
 
 EXPOSE 4444
-ENTRYPOINT ["./start.sh"]
+CMD ["./start.sh"]

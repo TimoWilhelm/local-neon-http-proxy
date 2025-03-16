@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Forward SIGTERM to child processes
+trap 'kill -TERM $(jobs -p) 2>/dev/null' TERM
+
 if [ -z "$PG_CONNECTION_STRING" ]; then
   echo "PG_CONNECTION_STRING is not set"
   exit 1
@@ -25,5 +28,4 @@ caddy run \
   --adapter caddyfile \
   &
 
-wait -n
-exit $?
+wait
